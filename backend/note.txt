@@ -1,0 +1,87 @@
+-Go to mongodb.com
+	-Don’t login
+	Download install “mongoldb compass”
+	-login
+	view all organization
+	create new organization
+	name “reviewMERN”, with mongodb atlas
+	-new project
+	name “reviewMERN”
+	-create a database
+	choose “FREE”
+		AWS, Oregon (us-west-2), cluster name “reviewMERNCluster”
+	-Security Quickstart
+	username and password
+		fruit13ok
+		ly13OK
+			create user
+	where would you like to connect form?
+		add my current IP address
+			Finish and Close
+	-go to database
+		it take a minute for the cluster to create
+		Browse collection
+			add my own data
+				database name “supportdeskdb”
+				collection name ‘users“
+		-go to Overview
+			click “connect”
+			choose “connect using MongoDB Compass”
+			copy the connection string to MongoDB Compass
+			mongodb+srv://fruit13ok:<password>@reviewmerncluster.3i1sjcv.mongodb.net/test
+			change <password> to
+			mongodb+srv://fruit13ok:ly13OK@reviewmerncluster.3i1sjcv.mongodb.net/test
+			click “databases”
+			there will be the 2 default db “admin” and “local”, and my “supportdeskdb”
+			click it, there will be my “users” collection
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+-create my “support-desk” project on my computer
+	/Users/yiliu/Desktop/Symphysis Marketing Solutions/review2022/support-desk
+	open in VScode
+	-create a folder “backend”
+		-create backend entry point “server.js”
+  -in “support-desk” directory create the package.json by
+    -in terminal
+    /Users/yiliu/Desktop/Symphysis Marketing Solutions/review2022/support-desk
+    npm init
+      entry point change from index.js to server.js
+      lecense MIT 
+  -change the run script in "package.json"
+    change "test" script to
+    "start": "node backend/server.js"
+  -to run the server.js 
+    -in terminal
+    /Users/yiliu/Desktop/Symphysis Marketing Solutions/review2022/support-desk
+    npm start
+
+-install some packages 
+  web framework, envirnment variable, ODM for mongodb, terminal color, hash password
+    npm i express dotenv mongoose colors bcryptjs
+
+-install dev dependency
+  nodemon to keep on watching the server without restart
+    npm i -D nodemon
+  in "package.json"
+  add script
+    "server": "nodemon backend/server.js"
+  -to run the server without restart for every changes
+    npm run server
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+-create github repo
+  -in terminal
+  git init
+  touch .gitignore
+    -in .gitignore
+      node_modules
+      .env  
+  git add .
+  git commit -m 'init commit'
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
