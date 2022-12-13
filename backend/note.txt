@@ -1,4 +1,18 @@
+-frequently used commands, and action 
+  npm start
+  npm run server
+  ctrl-c
+  when edited .env file restart server ctrl-c, npm run server
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+-setup mongodb, express server file stucture, github repo
+
 -Go to mongodb.com
+  -one of my account
+    fruit13ok@gmail.com 
+    yliu192@@
 	-Don’t login
 	Download install “mongoldb compass”
 	-login
@@ -29,15 +43,13 @@
 			choose “connect using MongoDB Compass”
 			copy the connection string to MongoDB Compass
 			mongodb+srv://fruit13ok:<password>@reviewmerncluster.3i1sjcv.mongodb.net/test
-			change <password> to
-			mongodb+srv://fruit13ok:ly13OK@reviewmerncluster.3i1sjcv.mongodb.net/test
+			change <password> and remove "test"
+			mongodb+srv://fruit13ok:ly13OK@reviewmerncluster.3i1sjcv.mongodb.net/
 			click “databases”
 			there will be the 2 default db “admin” and “local”, and my “supportdeskdb”
 			click it, there will be my “users” collection
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 -create my “support-desk” project on my computer
 	/Users/yiliu/Desktop/Symphysis Marketing Solutions/review2022/support-desk
@@ -74,6 +86,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 -create github repo
+  -in github create repo name "support-desk"
   -in terminal
   git init
   touch .gitignore
@@ -82,6 +95,192 @@
       .env  
   git add .
   git commit -m 'init commit'
+  git remote add origin https://github.com/fruit13ok/support-desk.git
+  git branch -M main
+  git push -u origin main
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
+
+-basic Express server ***
+  in server.js
+  bring in Express, make .env file use epxress to listen to prot 
+  create a GET request route
+
+-add routes and controller
+  -break routes in multiple file
+    create uesrRoutes.js in /backend/routes/uesrRoutes.js
+      use router = express.Router()
+      instead of app.post("/",), do router.post("/",)
+      export the router
+    in server.js
+      now can name a route and point to uesrRoutes.js by 
+        app.use("/api/users", require("./routes/userRoutes"));
+    so we can access path like http://localhost:5000/api/users
+    we can sub route like http://localhost:5000/api/users/login by
+      add more route and append a longer path name
+        router.post("/login",)
+ -use controller for manage what each route do by create functions
+  create userController.js in /backend/controllers/userController.js
+    create function to handle each request
+  in userRoutes.js access userController.js
+    in router's callback function call userController.js function
+  
+-error and exception handling ***
+  we will create "middleware" to OVERRIDE existing "throw new Error()"
+  handle the "body" data that send to registerUser and loginUser routes
+  we need express json and urlencoded (this used to be part of bodyparser, now included in express)
+    in server.js
+      app.use(express.json());
+      app.use(express.urlencoded({ extended: false }));
+  in userController.js, registerUser()
+    console.log(req.body);
+  in postman 
+    http://localhost:5000/api/users
+    POST, Body, urlencoded, key name: Yi, email: yi@gmail.com, password: 123
+      now terminal will log that body json object 
+  to handle error we can use if condition to send back response 
+    but we want the system to identify it as error
+      throw new Error alone will display a regular HTML error and other junk message
+        now "throw new Error()" will display HTML error message
+        so we want to create a middleware to handle errors, to get a json object
+        this errorMiddleware.js will OVERRIDE existing "throw new Error()"
+        create errorMiddleware.js in /backend/middleware/errorMiddleware.js
+          const errorHandler = (err, req, res, next) => {...}
+        in server.js, import errorMiddleware and use errorHandler
+          const { errorHandler } = require("./middleware/errorMiddleware");
+          app.use(errorHandler);
+        now "throw new Error()" will display JSON object error message, with stacktrace line number of the bug
+  to handle promise like response from database, we will use async/await handler 
+    install express-async-handler 
+    https://github.com/Abazhenov/express-async-handler
+    npm install --save express-async-handler
+    in userController.js, require it
+      const asyncHandler = require('express-async-handler')
+      change from 
+      const registerUser = (req, res) => {...}
+      to
+      const registerUser = asyncHandler(async (req, res) => {...});
+
+-connect to database
+  -in database account, 
+    connect, connect your application, copy the connection string,
+    mongodb+srv://fruit13ok:<password>@reviewmerncluster.3i1sjcv.mongodb.net/?retryWrites=true&w=majority
+  -in code, .env file paste string change password to database password "ly13OK", and insert db name "supportdeskdb"
+    MONGO_URI = mongodb+srv://fruit13ok:ly13OK@reviewmerncluster.3i1sjcv.mongodb.net/supportdeskdb?retryWrites=true&w=majority
+    -create database connection file in 
+      /backend/config/db.js
+    -in server.js, bring in colors
+      const colors = require("colors");
+    -in db.js, bring in mongoose
+      const mongoose = require("mongoose");
+      try to connect
+        const conn = await mongoose.connect(process.env.MONGO_URI);
+      catch error and exit 
+      export
+    -in server.js, bring in db.js connection function
+      run the db connectiojn function
+
+-register user
+  -create model file by writing its schema
+    /backend/models/userModels.js
+    schema: what a user model looks like, Schema upper case
+      const mongoose = require("mongoose");
+      const userSchema = mongoose.Schema({name: {...},email: {...},password: {...},isAdmin: {...},},{timestamps: true,});
+  -export model, code differently, "User" is upper case, so bring it in as upper case
+    module.exports = mongoose.model("User", userSchema);
+  -in userController.js, 
+    bring in bcrypt to hash the password to put it in database, and bring in user model
+    -in registerUser() function
+      -"Find" if user already exists us findOne()
+        const userExists = await User.findOne({email});
+      -Hash password
+        use bcrypt to generate "salt" and hash password
+      -create user
+        use our user model to create user
+          const user = await User.create({name: name,email: email,password: hashedPassword,});
+        after user successfully created into db, show the response back data
+  -in postman, create a new user to database
+    POST
+    http://localhost:5000/api/users/
+    name, email, password
+    result display back
+      {"_id": "639786f90225e1ce8bd5b721","name": "Yi","email": "yi@gmail.com"}
+
+-login and create JWT
+  -in userController.js, 
+    -in loginUser() function
+      find login info from db, if found user, then check password
+        use bcrypt "compare()" to compare input password and the db hashed password
+  -in postman, login user
+    POST
+    http://localhost:5000/api/users/
+    body, urlencoded
+    email: yi@gmail.com, password: wrong
+    then try  
+    email: yi@gmail.com, password: 123
+  -when crate new user or login we want to send back a "json web token", later on will store JWT in frontend
+    we need to install package "jsonwebtoken"
+      npm i jsonwebtoken
+    -in userController.js, bring in jsonwebtoken
+      create generateToken() function
+        use "jwt.sign()" with "id" passing in, and "JWT_SECRET" in .env file, and assign expiration "expiresIn"
+      in .env add JWT_SECRET
+      we also want to response back a JWT
+      in both registerUser() and loginUser() res.
+        token: generateToken(user._id)
+  -in MongoDB Compass, delete the user
+    -in postman register again
+      this time will also response with token, copy the token 
+    -go to jwt.io 
+      paste in the token to see the payload
+    -same goes for login user
+
+-Protect routes and authentication
+  we use the JWT token to access the non-public routes
+  -first create a new route
+    in userController.js, add the getMe() function, and export it
+    in userRoutes.js, bring in getMe() function from userController.js,
+      add /api/users/me route
+  -second protect new route with middleware
+    -create file authMiddleware.js,
+    -in authMiddleware.js, bring in: 
+      jsonwebtoken, express-async-handler, our userModels
+      create a "protect" function to protect route
+        get the token out from header authorization bearer token
+        decode it with JWT_SECRET
+        find the user by decoded user id
+        use next() funcion to continue to next middleware
+      export the protect function
+    -in userRoutes.js,
+      bring in protect() from authMiddleware.js
+        const { protect } = require("../middleware/authMiddleware");
+      to protect a route add "protect" as the second argument
+        router.get("/me", protect, getMe);
+    -in postman,
+      go to http://localhost:5000/api/users/me
+      GET
+      Authentication
+        no Auth 
+        this should get 401 unauthorized error
+      go to http://localhost:5000/api/users/login
+      POST
+      email, password
+      send and copy the toekn
+        eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzOTdiZDA3NTY0ZjQ2NjliNDk4ZWYyNSIsImlhdCI6MTY3MDg5NTcxMiwiZXhwIjoxNjczNDg3NzEyfQ.TspuRwFgcSLs_SuGhDLLUlJxTqyQkFsPhsIHfCsmhKA
+      go back to http://localhost:5000/api/users/me
+      GET
+      Authentication
+        Bearer token
+        paste the token here 
+      send will be 200 OK 
+    -in userController.js,
+      edit getMe() to send back better user data
+-now the backend is ready to put together with the frontend
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
 
