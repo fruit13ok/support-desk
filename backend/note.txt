@@ -279,6 +279,49 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+-frontend folder setup
+  -use create-react-app to create the frontend folder includes the redux boilderplate 
+    in root directory,
+      npx create-react-app frontend --template redux
+      (if there is error try "create-react-app@latest")
+      check and remove .git folder in frontend directory, we already have .git folder in root 
+        cd frontend
+        ls -a
+        rm -rf .git
+      try to run frontend
+        npm start
+      -we want to be able to run frontend from root
+        in root's package.json, edit "scripts",
+          "client": "npm start --prefix frontend"
+          cd ..
+          npm run client
+      -we want to run both server and client at once use "concurrently"
+        npm i concurrently
+        in root's package.json, edit "scripts",
+          "dev": "concurrently \"npm run server\" \"npm run client\""
+      try to run both frontend and backend 
+        npm run dev 
+  -install frontend dependencies, in the frontend folder
+    -while keep frontend and backend running, open up another terminal, and go to frontend folder,
+      npm i react-router-dom react-toastify axios react-icons react-modal
+        (ignore High severity vulnerability)
+  -clean up the unwanted files that installed
+    in frontend/src/ remove some file
+      remove logo.svg, App.css, App.test.js, setupTests.js,
+    in App.js remove some code
+      remove logo, css, counter, import react, remove header inside App()
+      keep the App() function and enter our text, we left
+        function App() {
+          return <div>My App</div>;
+        }
+        export default App;
+    in index.css remove all style
+      copy the lecture style from github 
+
+-header and initial pages
+
+
+
 
 
 
