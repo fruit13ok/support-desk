@@ -319,11 +319,42 @@
       copy the lecture style from github 
 
 -header and initial pages
+  use:
+    Router, Routes, Route, Link from react-router-dom
+    FaSignInAlt, FaSignOutAlt, FaUser from react-icons/fa
+  -create "pages" folder, and 3 pages 
+    frontend/src/pages 
+    Home.jsx, Login.jsx, Register.jsx 
+    -in Home.jsx 
+      generate code with
+        rfce tab
+      copy those code
+    -in Login.jsx
+      paste those code and change the function name
+    -in Register.jsx
+      paste those code and change the function name
+  -in App.js, 
+    we already installed "react-router-dom"
+    create 3 routes
+    return fragment <></> wraps <Router> wraps <Routes> wraps <Route> 
+      <Route path="/" element={<Home />} />
+    try the route http://localhost:3000/login
+  -in src, carate folder "components"
+    frontend/src/components
+  -in components, create Header.jsx component
+    this header link back to Home
+  -in App.js, add Header component above Routes
+  -in Header.jsx, under the div add list of Links
 
+-Home, Login, Register UI 
+  create register form, use useState to set form data state, use toast / ToastContainer to toast error message
+  -in Register.jsx, create a form, use useState to set form data state, use toast to set what to toast
+  -in App.js, use ToastContainer to set where/how to display the toast 
+  -in Login.jsx, copy all code from Register.jsx,
+    change the naming to Login, change icon to FaSignInAlt, change formData to just email and password, 
+    change onSubmit don't need to match password and password2, delete div form-group name and password2,
+  -in Home.jsx, use Link, for now link to 2 pages haven't yet build new-ticket and tickets
 
-
-
-
-
+-Redux setup & auth slice
 
 
